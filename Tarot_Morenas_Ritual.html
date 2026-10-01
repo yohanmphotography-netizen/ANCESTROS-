@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MORENAS Ritual - Lectura de Tarot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f0a0a;
+            --bg-wood: #18100e;
+            --gold: #d4af37;
+            --gold-light: #f3e5ab;
+            --gold-dark: #997a15;
+            --pergamino: #eddcb5;
+            --pergamino-dark: #d6c193;
+            --text-dark: #21160e;
+            --text-light: #f5eedc;
+            --shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: 'Cormorant Garamond', serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 12px 40px;
+            background-image: 
+                radial-gradient(circle at 50% 20%, rgba(212, 175, 55, 0.12) 0%, transparent 60%),
+                radial-gradient(circle at 50% 80%, rgba(107, 59, 167, 0.08) 0%, transparent 50%),
+                linear-gradient(180deg, #0a0707 0%, #170e0a 50%, #0a0707 100%);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Hojas de Monstera integradas en las esquinas */
+        .leaf-decor {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.35;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.9));
+        }
+
+        .leaf-top-left {
+            top: -30px;
+            left: -30px;
+            width: 140px;
+            transform: rotate(25deg);
+        }
+
+        .leaf-bottom-right {
+            bottom: -30px;
+            right: -30px;
+            width: 150px;
+            transform: rotate(-135deg);
+        }
+
+        /* Encabezado con Logo estilo Morenas Ritual */
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .logo-frame {
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+            padding: 4px;
+            background: radial-gradient(circle, #2a1b15 0%, #0f0a0a 100%);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.4), inset 0 0 10px rgba(0,0,0,0.8);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            color: var(--gold);
+            font-size: 1.8rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 700;
+            text-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
+            margin-bottom: 2px;
+        }
+
+        .tagline {
+            font-family: 'Cinzel', serif;
+            color: var(--gold-light);
+            font-size: 0.8rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            opacity: 0.85;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.05rem;
+            color: #d1c4a5;
+            font-style: italic;
+            max-width: 320px;
+            line-height: 1.3;
+        }
+
+        /* Grid de Cartas */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            width: 100%;
+            max-width: 440px;
+            perspective: 1000px;
+            z-index: 2;
+            margin-bottom: 20px;
+        }
+
+        .card-container {
+            aspect-ratio: 2 / 3.4;
+            cursor: pointer;
+            perspective: 1000px;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 8px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.7);
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px;
+            box-sizing: border-box;
+            border: 1.5px solid var(--gold);
+        }
+
+        /* Reverso oscuro con ornamento dorado */
+        .card-back {
+            background: linear-gradient(135deg, #1f1412 0%, #110a09 100%);
+            box-shadow: inset 0 0 12px rgba(212, 175, 55, 0.2);
+            overflow: hidden;
+        }
+
+        .card-back::before {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            border: 1px dashed rgba(212, 175, 55, 0.5);
+            border-radius: 5px;
+            pointer-events: none;
+        }
+
+        .card-back-svg {
+            width: 65%;
+            height: 65%;
+            margin: auto;
+            opacity: 0.9;
+        }
+
+        /* Anverso estilo Pergamino */
+        .card-front {
+            background: radial-gradient(circle, var(--pergamino) 0%, var(--pergamino-dark) 100%);
+            color: var(--text-dark);
+            transform: rotateY(180deg);
+            border: 2px solid var(--gold-dark);
+            box-shadow: inset 0 0 10px rgba(80, 50, 20, 0.3);
+        }
+
+        .card-front::before {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            border: 1px solid rgba(153, 122, 21, 0.4);
+            border-radius: 5px;
+            pointer-events: none;
+        }
+
+        .card-num {
+            font-family: 'Cinzel', serif;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: #634710;
+        }
+
+        .card-icon-wrap {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-icon-svg {
+            width: 100%;
+            height: 100%;
+            fill: #422f0c;
+        }
+
+        .card-title {
+            font-family: 'Cinzel', serif;
+            font-size: 0.62rem;
+            font-weight: 700;
+            text-align: center;
+            line-height: 1.1;
+            color: #2b1b08;
+            text-transform: uppercase;
+            border-top: 1px solid rgba(99, 71, 16, 0.3);
+            padding-top: 2px;
+            width: 95%;
+        }
+
+        /* Modal con Lectura Completa */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 6, 6, 0.92);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-card {
+            background: radial-gradient(circle at top, var(--pergamino) 0%, var(--pergamino-dark) 100%);
+            border: 3px solid var(--gold);
+            border-radius: 12px;
+            padding: 28px 22px 24px;
+            max-width: 380px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 0 35px rgba(212, 175, 55, 0.5), 0 15px 35px rgba(0,0,0,0.9);
+            color: var(--text-dark);
+            position: relative;
+            animation: modalAppear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes modalAppear {
+            from { opacity: 0; transform: scale(0.85) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-card::before {
+            content: '';
+            position: absolute;
+            inset: 6px;
+            border: 1px solid rgba(153, 122, 21, 0.5);
+            border-radius: 8px;
+            pointer-events: none;
+        }
+
+        .modal-icon-container {
+            width: 65px;
+            height: 65px;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-icon-container svg {
+            width: 100%;
+            height: 100%;
+            fill: #5e430d;
+        }
+
+        .modal-subtitle {
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            color: #7a5813;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .modal-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            color: #2b1c09;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 14px;
+            border-bottom: 1px solid rgba(122, 88, 19, 0.3);
+            padding-bottom: 8px;
+        }
+
+        .modal-reading {
+            font-size: 1.15rem;
+            line-height: 1.5;
+            color: #26190b;
+            font-style: italic;
+            margin-bottom: 22px;
+            padding: 0 5px;
+        }
+
+        .btn-ritual {
+            background: linear-gradient(135deg, #d4af37 0%, #a68119 100%);
+            color: #120b08;
+            border: 1px solid var(--gold-light);
+            padding: 12px 28px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            transition: all 0.2s ease;
+        }
+
+        .btn-ritual:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+        }
+
+        @media (max-width: 380px) {
+            .cards-grid {
+                gap: 8px;
+            }
+            .card-title {
+                font-size: 0.55rem;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hoja de Monstera Superior Izquierda -->
+    <svg class="leaf-decor leaf-top-left" viewBox="0 0 100 100" fill="#2d4a27">
+        <path d="M50 5 C 20 20, 5 45, 10 80 C 25 85, 45 80, 50 95 C 55 80, 75 85, 90 80 C 95 45, 80 20, 50 5 Z M 35 35 C 20 38, 12 48, 15 50 C 25 48, 38 42, 35 35 Z M 65 35 C 62 42, 75 48, 85 50 C 88 48, 80 38, 65 35 Z M 30 60 C 18 65, 15 72, 20 74 C 28 72, 35 66, 30 60 Z M 70 60 C 65 66, 72 72, 80 74 C 85 72, 82 65, 70 60 Z"/>
+    </svg>
+
+    <!-- Hoja de Monstera Inferior Derecha -->
+    <svg class="leaf-decor leaf-bottom-right" viewBox="0 0 100 100" fill="#2d4a27">
+        <path d="M50 5 C 20 20, 5 45, 10 80 C 25 85, 45 80, 50 95 C 55 80, 75 85, 90 80 C 95 45, 80 20, 50 5 Z M 35 35 C 20 38, 12 48, 15 50 C 25 48, 38 42, 35 35 Z M 65 35 C 62 42, 75 48, 85 50 C 88 48, 80 38, 65 35 Z M 30 60 C 18 65, 15 72, 20 74 C 28 72, 35 66, 30 60 Z M 70 60 C 65 66, 72 72, 80 74 C 85 72, 82 65, 70 60 Z"/>
+    </svg>
+
+    <header>
+        <div class="logo-frame">
+            <!-- Silueta de la Mujer con Turbante del Logo Morenas Ritual -->
+            <svg class="logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="46" stroke="#d4af37" stroke-width="2"/>
+                <path d="M35 32 C38 22, 55 18, 65 25 C72 30, 68 40, 60 42 C68 42, 72 48, 68 54 C62 58, 52 56, 48 54" stroke="#d4af37" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M48 54 C45 60, 46 68, 48 75 C42 75, 38 68, 40 60 Z" fill="#d4af37"/>
+                <circle cx="58" cy="62" r="4" stroke="#d4af37" stroke-width="1.5"/>
+            </svg>
+        </div>
+        <h1>Morenas</h1>
+        <div class="tagline">Ritual Tarot</div>
+        <p class="subtitle">Concéntrate en tu intención y elige una carta para revelar tu lectura</p>
+    </header>
+
+    <div class="cards-grid" id="cardsGrid"></div>
+
+    <!-- Modal de Lectura -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-card">
+            <div class="modal-icon-container" id="modalIcon"></div>
+            <div class="modal-subtitle">Tu Revelación de Hoy</div>
+            <h2 class="modal-title" id="modalTitle"></h2>
+            <p class="modal-reading" id="modalReading"></p>
+            <button class="btn-ritual" onclick="closeModalAndShuffle()">Nueva Lectura</button>
+        </div>
+    </div>
+
+    <script>
+        // Íconos SVG limpios para cada una de las 20 cartas
+        const svgIcons = {
+            loco: `<svg viewBox="0 0 24 24"><path d="M12 2L15 8L21 9L17 14L18 20L12 17L6 20L7 14L3 9L9 8L12 2Z"/></svg>`,
+            mago: `<svg viewBox="0 0 24 24"><path d="M7.5 2L9 7L14 8.5L9 10L7.5 15L6 10L1 8.5L6 7L7.5 2Z M18 10L19 13.5L22.5 14.5L19 15.5L18 19L17 15.5L13.5 14.5L17 13.5L18 10Z"/></svg>`,
+            sacerdotisa: `<svg viewBox="0 0 24 24"><path d="M12 2A10 10 0 1 0 22 12A10 10 0 0 0 12 2ZM12 20A8 8 0 0 1 12 4A8 8 0 0 0 12 20Z"/></svg>`,
+            emperatriz: `<svg viewBox="0 0 24 24"><path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5Z M5 18H19V20H5V18Z"/></svg>`,
+            emperador: `<svg viewBox="0 0 24 24"><path d="M19 4H5V8H19V4ZM3 20H21V18H3V20ZM6 16H9V10H6V16ZM15 10V16H18V10H15ZM11 10V16H13V10H11Z"/></svg>`,
+            sacerdote: `<svg viewBox="0 0 24 24"><path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM11 7H13V11H17V13H13V17H11V13H7V11H11V7Z"/></svg>`,
+            enamorados: `<svg viewBox="0 0 24 24"><path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z"/></svg>`,
+            carro: `<svg viewBox="0 0 24 24"><path d="M18 4L12 2L6 4L4 10L12 13L20 10L18 4ZM4 14V20H7V14H4ZM17 14V20H20V14H17ZM9 15H15V19H9V15Z"/></svg>`,
+            fuerza: `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 6C13.66 6 15 7.34 15 9C15 10.66 13.66 12 12 12C10.34 12 9 10.66 9 9C9 7.34 10.34 6 12 6Z"/></svg>`,
+            ermitanno: `<svg viewBox="0 0 24 24"><path d="M9 21H15V19H9V21ZM12 2C8.14 2 5 5.14 5 9C5 11.38 6.19 13.47 8 14.74V17C8 17.55 8.45 18 9 18H15C15.55 18 16 17.55 16 17V14.74C17.81 13.47 19 11.38 19 9C19 5.14 15.86 2 12 2Z"/></svg>`,
+            rueda: `<svg viewBox="0 0 24 24"><path d="M12 2A10 10 0 1 0 22 12A10 10 0 0 0 12 2ZM12 15A3 3 0 1 1 15 12A3 3 0 0 1 12 15ZM13 4.07V7H11V4.07A8 8 0 0 1 13 4.07ZM4.07 11H7V13H4.07A8 8 0 0 1 4.07 11ZM11 19.93V17H13V19.93A8 8 0 0 1 11 19.93ZM19.93 13H17V11H19.93A8 8 0 0 1 19.93 13Z"/></svg>`,
+            justicia: `<svg viewBox="0 0 24 24"><path d="M11 2V5H4V7H11V11.17C9.25 11.59 8 13.14 8 15C8 17.21 9.79 19 12 19C14.21 19 16 17.21 16 15C16 13.14 14.75 11.59 13 11.17V7H20V5H13V2H11ZM12 13C13.1 13 14 13.9 14 15C14 16.1 13.1 17 12 17C10.9 17 10 16.1 10 15C10 13.9 10.9 13 12 13Z"/></svg>`,
+            colgado: `<svg viewBox="0 0 24 24"><path d="M12 2V8M12 8L7 18H17L12 8ZM12 22A2 2 0 1 0 12 18A2 2 0 0 0 12 22Z" stroke="#422f0c" stroke-width="2" fill="none"/></svg>`,
+            muerte: `<svg viewBox="0 0 24 24"><path d="M12 3C7.03 3 3 7.03 3 12C3 16.97 7.03 21 12 21C16.97 21 21 16.97 21 12C21 7.03 16.97 3 12 3ZM12 6C13.66 6 15 7.34 15 9C15 10.66 13.66 12 12 12C10.34 12 9 10.66 9 9C9 7.34 10.34 6 12 6ZM8 16C8 14.67 10.67 14 12 14C13.33 14 16 14.67 16 16V17H8V16Z"/></svg>`,
+            templanza: `<svg viewBox="0 0 24 24"><path d="M6 3L3 9V11C3 13.21 4.79 15 7 15H8V19H5V21H19V19H16V15H17C19.21 15 21 13.21 21 11V9L18 3H6ZM11 15V19H13V15H11Z"/></svg>`,
+            diablo: `<svg viewBox="0 0 24 24"><path d="M17.5 9.5C16.12 9.5 15 10.62 15 12C15 13.38 16.12 14.5 17.5 14.5C18.88 14.5 20 13.38 20 12C20 10.62 18.88 9.5 17.5 9.5ZM6.5 9.5C5.12 9.5 4 10.62 4 12C4 13.38 5.12 14.5 6.5 14.5C7.88 14.5 9 13.38 9 12C9 10.62 7.88 9.5 6.5 9.5ZM12 2L9 7H15L12 2ZM12 16C9.33 16 4 17.34 4 20V22H20V20C20 17.34 14.67 16 12 16Z"/></svg>`,
+            torre: `<svg viewBox="0 0 24 24"><path d="M7 21H17V11H7V21ZM12 2L4 7V9H20V7L12 2ZM9 13H11V15H9V13ZM13 13H15V15H13V13ZM9 17H11V19H9V17ZM13 17H15V19H13V17Z"/></svg>`,
+            estrella: `<svg viewBox="0 0 24 24"><path d="M12 2L14.39 8.26L21 9.27L16.25 13.97L17.38 20.6L12 17.27L6.62 20.6L7.75 13.97L3 9.27L9.61 8.26L12 2Z"/></svg>`,
+            luna: `<svg viewBox="0 0 24 24"><path d="M12.3 2A10 10 0 0 0 21.5 14.1A10 10 0 1 1 9.9 2.5A10 10 0 0 0 12.3 2Z"/></svg>`,
+            sol: `<svg viewBox="0 0 24 24"><path d="M12 7C9.24 7 7 9.24 7 12C7 14.76 9.24 17 12 17C14.76 17 17 14.76 17 12C17 9.24 14.76 7 12 7ZM2 13H5V11H2V13ZM19 13H22V11H19V13ZM11 2V5H13V2H11ZM11 19V22H13V19H11ZM5.64 4.22L3.52 6.34L5.64 8.46L7.76 6.34L5.64 4.22ZM18.36 16.95L16.24 19.07L18.36 21.19L20.48 19.07L18.36 16.95ZM7.76 17.66L5.64 19.78L3.52 17.66L5.64 15.54L7.76 17.66ZM19.78 5.64L17.66 3.52L15.54 5.64L17.66 7.76L19.78 5.64Z"/></svg>`
+        };
+
+        const deck = [
+            { id: "0", name: "El Loco", key: "loco", meaning: "Un salto de fe hacia nuevas experiencias. Deja atrás la rutina y atrévete a probar lo inesperado con entusiasmo y libertad." },
+            { id: "I", name: "El Mago", key: "mago", meaning: "Tienes en tus manos todo lo necesario para manifestar lo que deseas. Tu intención y creatividad transforman cualquier instante en magia pura." },
+            { id: "II", name: "La Sacerdotisa", key: "sacerdotisa", meaning: "Escucha la voz de tu intuición. Hay verdades y placeres sutiles que solo se revelan a quienes saben observar en silencio." },
+            { id: "III", name: "La Emperatriz", key: "emperatriz", meaning: "Tiempo de deleite, sensualidad y plenitud. Permítete disfrutar con todos los sentidos y celebrar la belleza que te rodea." },
+            { id: "IV", name: "El Emperador", key: "emperador", meaning: "Fuerza, estructura y seguridad. Mantén el enfoque y toma el control total de tu camino con firmeza y elegancia." },
+            { id: "V", name: "El Sumo Sacerdote", key: "sacerdote", meaning: "La Sabiduría de las raíces y la magia de compartir en comunidad. Conecta con lo auténtico y lo esencial." },
+            { id: "VI", name: "Los Enamorados", key: "enamorados", meaning: "Cómplices y afinidad de deseos. Cuando eliges desde el corazón, la armonía fluye de manera natural." },
+            { id: "VII", name: "El Carro", key: "carro", meaning: "Determinación y superación con éxito. Mantén las riendas firmes hacia la meta que te has propuesto." },
+            { id: "VIII", name: "La Fuerza", key: "fuerza", meaning: "Dominio sutil y magnetismo. Tu verdadera fortaleza no es destructiva, sino cálida, paciente y envolvente." },
+            { id: "IX", name: "El Ermitaño", key: "ermitanno", meaning: "Una pausa sagrada para encontrar claridad. Desconecta del ruido exterior para escuchar lo que tu espíritu necesita." },
+            { id: "X", name: "La Rueda", key: "rueda", meaning: "El destino se mueve a tu favor. Abre tus brazos a las sorpresas y giros inesperados que trae la vida." },
+            { id: "XI", name: "La Justicia", key: "justicia", meaning: "Armonía y alineación perfecta. Cosechas exactamente la energía, la dedicación y el amor que entregas." },
+            { id: "XII", name: "El Colgado", key: "colgado", meaning: "Un cambio de ángulo revela verdades ocultas. Soltar el control momentáneamente te brinda una claridad profunda." },
+            { id: "XIII", name: "La Muerte", key: "muerte", meaning: "El arte de renovarse. Cierras un ciclo con gratitud para dar paso a una etapa mucho más brillante y ligera." },
+            { id: "XIV", name: "La Templanza", key: "templanza", meaning: "Alquimia, balance y fluidez. La combinación justa de elementos crea la receta de la paz y el bienestar." },
+            { id: 15, name: "El Diablo", key: "diablo", meaning: "Cede al deseo sin culpa. Rompe con la rigidez del día a día y regálate ese gusto intenso que estabas postergando." },
+            { id: "XVI", name: "La Torre", key: "torre", meaning: "Ruptura de lo monótono. Una revelación repentina te libera de ilusiones para construir algo mucho más sólido." },
+            { id: "XVII", name: "La Estrella", key: "estrella", meaning: "Inspiración, calma y brillo propio. La tormenta ha quedado atrás y una luz clara guía tu trayecto." },
+            { id: "XVIII", name: "La Luna", key: "luna", meaning: "Encanto, misterio y profundidades. Déjate llevar por la magia de la noche y la fuerza de tus sueños." },
+            { id: "XIX", name: "El Sol", key: "sol", meaning: "Vitalidad, éxito y alegría compartida. Todo se ilumina a tu alrededor cuando te muestras tal como eres." }
+        ];
+
+        let hasSelectedCard = false;
+
+        // Algoritmo Fisher-Yates para barajar perfectamente
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            const newArray = [...array];
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [newArray[currentIndex], newArray[randomIndex]] = [newArray[randomIndex], newArray[currentIndex]];
+            }
+            return newArray;
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('cardsGrid');
+            grid.innerHTML = '';
+            hasSelectedCard = false;
+
+            const shuffledDeck = shuffle(deck);
+
+            shuffledDeck.forEach((cardData, idx) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'card-container';
+                
+                cardEl.innerHTML = `
+                    <div class="card" style="transition-delay: ${idx * 25}ms">
+                        <div class="card-face card-back">
+                            <svg class="card-back-svg" viewBox="0 0 100 100" fill="none">
+                                <circle cx="50" cy="50" r="42" stroke="#d4af37" stroke-width="1.5" stroke-dasharray="3 2"/>
+                                <polygon points="50,15 61,38 85,50 61,62 50,85 39,62 15,50 39,38" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+                                <circle cx="50" cy="50" r="10" fill="#d4af37"/>
+                            </svg>
+                        </div>
+                        <div class="card-face card-front">
+                            <span class="card-num">${cardData.id}</span>
+                            <div class="card-icon-wrap">
+                                ${svgIcons[cardData.key]}
+                            </div>
+                            <div class="card-title">${cardData.name}</div>
+                        </div>
+                    </div>
+                `;
+
+                cardEl.addEventListener('click', () => selectCard(cardEl, cardData));
+                grid.appendChild(cardEl);
+            });
+        }
+
+        function selectCard(container, data) {
+            if (hasSelectedCard) return;
+            hasSelectedCard = true;
+
+            const card = container.querySelector('.card');
+            card.classList.add('flipped');
+
+            setTimeout(() => {
+                document.getElementById('modalIcon').innerHTML = svgIcons[data.key];
+                document.getElementById('modalTitle').innerText = data.name;
+                document.getElementById('modalReading').innerText = `"${data.meaning}"`;
+                document.getElementById('modalOverlay').classList.add('active');
+            }, 850);
+        }
+
+        function closeModalAndShuffle() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            setTimeout(() => {
+                renderGrid();
+            }, 300);
+        }
+
+        // Inicializar al cargar
+        window.addEventListener('DOMContentLoaded', renderGrid);
+    </script>
+</body>
+</html>
